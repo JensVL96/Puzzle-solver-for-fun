@@ -44,75 +44,51 @@ class create_board():
         for r in range(1,self.side+1):
             print( "".join(n+s for n,s in zip(self.nums[r-1],self.line1.split("."))) )
             print([self.line2,self.line3,self.line4][(r%self.side==0)+(r%self.base==0)])
-
-class solve_board():
+    
+class cell():
     def __init__(self, board):
-        self.row = []
-        self.col = []
-        self.cell = []
-        self.row_list = []
-        self.col_list = []
-        self.cell_list = []
+    def row():
+        pass
 
-        for space in range(9):
-            self.col.append([])
-            self.cell.append([])
+    def col():
+        pass
 
-        row_idx = 0
-        for line in board:
+    def box():
+        pass
 
-            self.row.append(line)
+    def flag():
+        pass
 
-            cell_idx = 0
-            if row_idx >= 3:
-                cell_idx = 3
-            if row_idx >= 6:
-                cell_idx = 6
+class search():
+    def row():
+        pass
 
-            
-            for col_idx in range(9):
+    def col():
+        pass
 
-                self.col[col_idx].insert(row_idx, line[col_idx])
+    def box():
+        pass
 
-                if col_idx % 3 == 0:
-                    for triple in range(0, 3):
-                        self.cell[cell_idx].insert(len(self.cell[row_idx]) + triple, line[col_idx + triple])
-                    cell_idx += 1
-
-            self.row_list.append(self.row)
-            self.col_list.append(self.col)
-            self.cell_list.append(self.cell)
-            row_idx += 1
-
-        print("\nrow:")
-        for row in self.row_list[0]:
-            print(row)
-        # print("\ncolumn:")
-        # for col in self.col_list[0]:
-        #     print(col)
-        # print("\ncell:")
-        # for cell in self.cell_list[0]:
-        #     print(cell)
-
+class flags():
     def assign_flags(self, board):
         self.flags = []
         row_idx = 0
-        cell_idx = 0
+        box_idx = 0
 
         print("\n")
         for line in board:
-            cell_idx = 0
+            box_idx = 0
             if row_idx >= 3:
-                cell_idx = 3
+                box_idx = 3
             if row_idx >= 6:
-                cell_idx = 6
+                box_idx = 6
 
             for index in range(9):
                 # print("position: ", index, "value: ", line[index])
 
-                # print("row", row_idx, "col", index, "cell", cell_idx)
+                # print("row", row_idx, "col", index, "box", box_idx)
                 if (index % 3 == 0 and index != 0):
-                    cell_idx += 1
+                    box_idx += 1
 
                 if line[index] == 0:
                     flag_idx = 0
@@ -125,8 +101,8 @@ class solve_board():
                         elif self.col_flag(value, index):
                             # print("found in column")
                             pass
-                        elif self.cell_flag(value, cell_idx):
-                            # print("found in cell")
+                        elif self.box_flag(value, box_idx):
+                            # print("found in box")
                             pass
                         else:
                             temp_flag.append(value)
@@ -135,22 +111,13 @@ class solve_board():
                     self.flags.append(temp_flag)
             row_idx += 1
 
-    def check_row(self):
-        pass
-
-    def column(self, x):
-        pass
-
-    def cell(self, row, col):
-        pass
-
     def row_flag(self, index, row_idx):
         for row in self.row_list[0][row_idx]:
             # print("comparing in row ", row, "with ", index, "row_idx ", row_idx)
             if row == index:
                 return 1
         return 0
-    
+
     def col_flag(self, index, col_idx):
         for col in self.col_list[0][col_idx]:
             # print("comparing in column ", col, "with ", index, "col_idx ", col_idx)
@@ -158,16 +125,70 @@ class solve_board():
                 return 1
         return 0
 
-    def cell_flag(self, index, cell_idx):
-        for cell in self.cell_list[0][cell_idx]:
-            # print("comparing in cell ", cell, "with ", index, "cell_idx ", cell_idx)
-            if cell == index:
+    def box_flag(self, index, box_idx):
+        for box in self.box_list[0][box_idx]:
+            # print("comparing in box ", box, "with ", index, "box_idx ", box_idx)
+            if box == index:
                 return 1
         return 0
 
 
+class solve_board():
+    def create_lists(self, board):
+        self.row = []
+        self.col = []
+        self.box = []
+        self.row_list = []
+        self.col_list = []
+        self.box_list = []
+
+        for space in range(9):
+            self.col.append([])
+            self.box.append([])
+
+        row_idx = 0
+        for line in board:
+
+            self.row.append(line)
+
+            box_idx = 0
+            if row_idx >= 3:
+                box_idx = 3
+            if row_idx >= 6:
+                box_idx = 6
+
+            
+            for col_idx in range(9):
+
+                self.col[col_idx].insert(row_idx, line[col_idx])
+
+                if col_idx % 3 == 0:
+                    for triple in range(0, 3):
+                        self.box[box_idx].insert(len(self.box[row_idx]) + triple, line[col_idx + triple])
+                    box_idx += 1
+
+            self.row_list.append(self.row)
+            self.col_list.append(self.col)
+            self.box_list.append(self.box)
+            row_idx += 1
+
+        print("\nrow:")
+        for row in self.row_list[0]:
+            print(row)
+        # print("\ncolumn:")
+        # for col in self.col_list[0]:
+        #     print(col)
+        # print("\nbox:")
+        # for box in self.box_list[0]:
+        #     print(box)
+
+
 class Display_board():
-    pass
+    def print_lists(name, list):
+        print("%s", name)
+        for line in list:
+            print(line)
+
 
 
 class Main():
