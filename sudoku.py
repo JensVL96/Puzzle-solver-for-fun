@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import pygame as pg
+import sys
+import pprint
 from random import sample
 from string import *
 import numpy as np
 
-class create_board():
+class Create_board():
     def __init__(self):
         self.base  = 3  # Will generate any size of random sudoku board in O(n^2) time
         self.side  = self.base * self.base
@@ -45,9 +47,46 @@ class create_board():
             print( "".join(n+s for n,s in zip(self.nums[r-1],self.line1.split("."))) )
             print([self.line2,self.line3,self.line4][(r%self.side==0)+(r%self.base==0)])
     
-class cell():
-    def __init__(self, board):
-    def row():
+class Cell():
+    def create_cell(self, board, lists, flags, index):
+        self.board = board
+        self.lists = lists
+        self.flags = flags
+        naked = "Contains a digit"
+
+        self.row = self.find_row(index)
+        self.col = self.find_col(index)
+        self.box = self.find_box(index)
+        self.flag = self.find_flag(index)
+
+        if not self.flag:
+            self.flag = naked
+
+        return self
+
+    def find_row(self, index):
+        return self.lists.ret_row_list(index % len(self.board[0]))
+
+    def find_col(self, index):
+        return self.lists.ret_col_list(index % len(self.board[0]))
+
+    def find_box(self, index):
+        return self.lists.ret_box_list(index % len(self.board[0]))
+
+    def find_flag(self, index):
+        return self.flags.ret_flag_list(index)
+
+    def search_flag(self, index):
+        print(self.row, self.col, self.box, self.flag)
+
+        search_inst = Search()
+
+        search_inst.row(self.flag, self.row, index)
+
+
+
+class Search():
+    def row(flags, row, curr_idx):
         pass
 
     def col():
@@ -56,21 +95,11 @@ class cell():
     def box():
         pass
 
-    def flag():
+    def update():
         pass
 
-class search():
-    def row():
-        pass
-
-    def col():
-        pass
-
-    def box():
-        pass
-
-class flags():
-    def assign_flags(self, board):
+class Candidates():
+    def assign_flags(self, board, lists):
         self.flags = []
         row_idx = 0
         box_idx = 0
@@ -95,46 +124,40 @@ class flags():
                     temp_flag = []
                     for value in range(1, 10):
                         # print(value)
-                        if self.row_flag(value, row_idx):
+                        if self.line_contains(lists.ret_row_list(row_idx), value, row_idx):
                             # print("found in row")
                             pass
-                        elif self.col_flag(value, index):
+                        elif self.line_contains(lists.ret_col_list(index), value, index):
                             # print("found in column")
                             pass
-                        elif self.box_flag(value, box_idx):
+                        elif self.line_contains(lists.ret_box_list(box_idx), value, box_idx):
                             # print("found in box")
                             pass
                         else:
                             temp_flag.append(value)
                             flag_idx += 1
-                    print(temp_flag)
                     self.flags.append(temp_flag)
+                else:
+                    self.flags.append([])
             row_idx += 1
 
-    def row_flag(self, index, row_idx):
-        for row in self.row_list[0][row_idx]:
+    def line_contains(self, line, digit, line_idx):
+        for index in line:
             # print("comparing in row ", row, "with ", index, "row_idx ", row_idx)
-            if row == index:
+            if index == digit:
                 return 1
         return 0
 
-    def col_flag(self, index, col_idx):
-        for col in self.col_list[0][col_idx]:
-            # print("comparing in column ", col, "with ", index, "col_idx ", col_idx)
-            if col == index:
-                return 1
-        return 0
+    def ret_flag_list(self, index):
+        # print("idx: ", index, "<- there", self.flags[index])
+        return self.flags[index]
 
-    def box_flag(self, index, box_idx):
-        for box in self.box_list[0][box_idx]:
-            # print("comparing in box ", box, "with ", index, "box_idx ", box_idx)
-            if box == index:
-                return 1
-        return 0
+    def ret_list(self):
+        return self.flags
 
 
-class solve_board():
-    def create_lists(self, board):
+class Lists():
+    def init_lists(self, board):
         self.row = []
         self.col = []
         self.box = []
@@ -157,9 +180,7 @@ class solve_board():
             if row_idx >= 6:
                 box_idx = 6
 
-            
             for col_idx in range(9):
-
                 self.col[col_idx].insert(row_idx, line[col_idx])
 
                 if col_idx % 3 == 0:
@@ -172,36 +193,130 @@ class solve_board():
             self.box_list.append(self.box)
             row_idx += 1
 
-        print("\nrow:")
-        for row in self.row_list[0]:
-            print(row)
-        # print("\ncolumn:")
-        # for col in self.col_list[0]:
-        #     print(col)
-        # print("\nbox:")
-        # for box in self.box_list[0]:
-        #     print(box)
+        display = Display_board()
 
+        display.print_lists("rows: ", self.row_list)
+        display.print_lists("columns: ", self.col_list)
+        display.print_lists("boxes: ", self.box_list)
+        
+    def ret_row_list(self, index):
+        return self.row_list[0][index]
+
+    def ret_col_list(self, index):
+        return self.col_list[0][index]
+
+    def ret_box_list(self, index):
+        return self.box_list[0][index]
 
 class Display_board():
-    def print_lists(name, list):
-        print("%s", name)
-        for line in list:
+    def print_lists(self, name, list):
+        print(name)
+        for line in list[0]:
             print(line)
+
+    def print_flags(self, cell, flags):
+        pass
+        """ temp_line = []
+
+        for space in range(9):
+            temp_line.append([])
+
+        print(flags)
+        cell_idx = 0
+        for cell in flags:
+            max_len = 0
+
+            if cell_idx == 9:
+                for i in range(9):
+                    print(flags[0][i])
+                    if max_len < len(flags[i]):
+                        max_len = len(flags[i])
+
+            print(max_len) """
+
+        """ new_line = -1
+        one_time = 0
+        for i in range(81):
+            new_line += 1
+            flags = cell.find_flag(i)
+
+            temp_idx = i % 9
+
+            if i % 9 == 0:
+                max_len = 0
+                new_line = 0
+                print("\n")
+                for j in range(9):
+                    index = temp_idx * 9 + j
+                    print(i, temp_idx, j, index, cell.find_flag(j))
+                    if max_len < len(cell.find_flag(index)):
+                        max_len = len(cell.find_flag(index))
+
+            if new_line == 0:
+                print("length: ",max_len)
+            #go though lenght of falgs on one row and check for longest (tabbing print)
+
+            
+            if max_len > 5:
+                tab = 0
+            elif (2 < max_len < 6):
+                tab = 2
+            else:
+                tab = 3
+            print(flags, '\t' * tab, end='')
+            
+            # print(max_len, flags)
+            
+            # print(new_line, flags)
+            temp_line[new_line].insert(new_line, flags) """
+            
+        print("\n")
+        # pp = pprint.PrettyPrinter(width=100)
+        # for i in range(len(temp_line)):
+        #     pp.pprint(temp_line[i])
+        #     print(np.matrix(temp_line[i]))
+        #     pass
+
+        # flag_list = flag_inst.ret_list()
+        # print(flag_list)
+        # a = np.array(flag_list, dtype=object)
+        # print(a)
+
+        # flags.ret_flag_list(index)
+        # print(flags, ", ", end = '')
+        # pp = pprint.PrettyPrinter(indent=3)
+        # pp.pprint(flags)
 
 
 
 class Main():
     def __init__(self):
         self.board = []
+        self.board = Create_board().board
+        self.list_inst = Lists()
+        self.flag_inst = Candidates()
         self.run()
 
     def run(self):
-        self.board = create_board().board
+        self.list_inst.init_lists(self.board)
+        self.flag_inst.assign_flags(self.board, self.list_inst)
 
-        self.solution = solve_board(self.board)
 
-        self.solution.assign_flags(self.board)
+        cell_inst = Cell()
+        for i in range(len(self.board[0]) * len(self.board)):
+            cell_inst.create_cell(self.board, self.list_inst, self.flag_inst, i)
+
+            cell_inst.search_flag(i)
+
+
 
 if __name__ == '__main__':
     Main()
+
+
+
+# Search methods
+
+# only instance of number on row/ on column/ in box
+
+# Sharing a tuple/ triple/+ with others in same row/ column with the same length in both
