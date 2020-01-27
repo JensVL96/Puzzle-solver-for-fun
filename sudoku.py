@@ -17,8 +17,9 @@ class Create_board():
         cols  = [ c for g in sample(range(self.base),self.base) for c in sample(range(g * self.base,(g + 1) * self.base), self.base) ]            
         self.board = [[self.board[r][c] for c in cols] for r in rows]
 
-        # print("\nInput:")
-        # for line in self.board: print(line)
+        print("\nInput:")
+        for line in self.board: print(line)
+        print("\n\n\n")
 
         squares = self.side * self.side
         empties = squares * 3//4
@@ -48,6 +49,17 @@ class Create_board():
             print([self.line2,self.line3,self.line4][(r%self.side==0)+(r%self.base==0)])
     
 class Cell():
+    def __init__(self, board, lists, flags, index):
+        self.board = board
+        self.lists = lists
+        self.digit = board[index]
+        naked = "Contains a digit"
+
+        self.flag = self.find_flag(flags, index)
+
+        if not self.flag:
+            self.flag = naked
+
     def create_cell(self, board, lists, flags, index):
         self.board = board
         self.lists = lists
@@ -73,8 +85,8 @@ class Cell():
     def find_box(self, index):
         return self.lists.ret_box_list(index % len(self.board[0]))
 
-    def find_flag(self, index):
-        return self.flags.ret_flag_list(index)
+    def find_flag(self, flags,  index):
+        return flags.ret_flag_list(index)
 
     def search_flag(self, index):
         print(self.row, self.col, self.box, self.flag)
@@ -86,21 +98,63 @@ class Cell():
 
 
 class Search():
-    def row(flags, row, curr_idx):
+    def __init__(self):
+        cell_list = []
+        """ while(1):
+            cell_list.append(Cell(self.board, lists.ret_row_list(index), lists.ret_col_list(index), lists.ret_box_list(index))
+            print(cell_list[1]) """
+
+    # Very easy to medium
+    def intersections(box_list):
+        result = [ target for target in box_list if box_list.count(target) == 1 ]
+
+    def forced_moves():
         pass
 
-    def col():
+    def pinned_squares():
         pass
 
-    def box():
+    # Hard
+    def Locked_sets():
         pass
 
-    def update():
+    def intersection_removal():
+        pass
+
+    # Very hard
+    def x_wing():
+        pass
+
+    def swordfish():
+        pass
+
+    def remote_pairs():
+        pass
+
+    def unique_rectangles_1():
+        pass
+
+    def hidden_sets():
+        pass
+
+    # Super hard
+    def unique_rectangles_2():
+        pass
+
+    def xy_wing():
+        pass
+
+    def xyz_wing():
+        pass
+
+    def BUG_removal():
         pass
 
 class Candidates():
+    flags = []
+
     def assign_flags(self, board, lists):
-        self.flags = []
+        
         row_idx = 0
         box_idx = 0
 
@@ -123,7 +177,6 @@ class Candidates():
                     flag_idx = 0
                     temp_flag = []
                     for value in range(1, 10):
-                        # print(value)
                         if self.line_contains(lists.ret_row_list(row_idx), value, row_idx):
                             # print("found in row")
                             pass
@@ -140,6 +193,7 @@ class Candidates():
                 else:
                     self.flags.append([])
             row_idx += 1
+        print(self.flags)
 
     def line_contains(self, line, digit, line_idx):
         for index in line:
@@ -150,20 +204,22 @@ class Candidates():
 
     def ret_flag_list(self, index):
         # print("idx: ", index, "<- there", self.flags[index])
-        return self.flags[index]
+        return flags[index]
 
     def ret_list(self):
-        return self.flags
+        return flags
 
 
 class Lists():
+    row_list = []
+    col_list = []
+    box_list = []
+
     def init_lists(self, board):
         self.row = []
         self.col = []
         self.box = []
-        self.row_list = []
-        self.col_list = []
-        self.box_list = []
+        
 
         for space in range(9):
             self.col.append([])
@@ -208,14 +264,22 @@ class Lists():
     def ret_box_list(self, index):
         return self.box_list[0][index]
 
+    def ret_rows(self):
+        return self.row_list[0]
+
+    def ret_cols(self):
+        return self.col_list[0]
+
+    def ret_boxes(self):
+        return self.box_list[0]
+
 class Display_board():
-    def print_lists(self, name, list):
+    def print_lists(self, name, lists):
         print(name)
-        for line in list[0]:
+        for line in lists[0]:
             print(line)
 
-    def print_flags(self, cell, flags):
-        pass
+    def print_flags(self, flags):
         """ temp_line = []
 
         for space in range(9):
@@ -233,8 +297,7 @@ class Display_board():
                         max_len = len(flags[i])
 
             print(max_len) """
-
-        """ new_line = -1
+        new_line = -1
         one_time = 0
         for i in range(81):
             new_line += 1
@@ -268,7 +331,7 @@ class Display_board():
             # print(max_len, flags)
             
             # print(new_line, flags)
-            temp_line[new_line].insert(new_line, flags) """
+            temp_line[new_line].insert(new_line, flags)
             
         print("\n")
         # pp = pprint.PrettyPrinter(width=100)
@@ -300,13 +363,18 @@ class Main():
     def run(self):
         self.list_inst.init_lists(self.board)
         self.flag_inst.assign_flags(self.board, self.list_inst)
+        display = Display_board()
+        # display.print_flags(self.flag_inst)
 
 
-        cell_inst = Cell()
-        for i in range(len(self.board[0]) * len(self.board)):
-            cell_inst.create_cell(self.board, self.list_inst, self.flag_inst, i)
+        # cell_inst = Cell()
+        # for i in range(len(self.board[0]) * len(self.board)):
 
-            cell_inst.search_flag(i)
+        #     cell_inst.create_cell(self.board, self.list_inst, self.flag_inst, i)
+
+        #     cell_inst.search_flag(i)
+
+        
 
 
 
