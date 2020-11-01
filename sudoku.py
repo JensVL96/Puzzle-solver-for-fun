@@ -6,6 +6,7 @@ from solve_bloard import *
 from display_board import *
 
 from string import *
+from math import floor
 import pygame as pg
 import numpy as np
 
@@ -22,12 +23,12 @@ def set_highlight(row, col, blk, lock):
 
 def get_cord(pos): 
     global box_index_x 
-    box_index_x = (pos[0] - TOP_LX)//BLOCK_SIZE 
+    box_index_x = int((pos[0] - TOP_LX)//BLOCK_SIZE)
     global box_index_y 
-    box_index_y = (pos[1] - TOP_LY)//BLOCK_SIZE 
+    box_index_y = int((pos[1] - TOP_LY)//BLOCK_SIZE)
 
 
-def valid(grid, x, y, val, increase): 
+def valid(grid, x, y, val): 
     input_lock = 0
     row = col = blk = (0, 0)
 
@@ -59,6 +60,19 @@ def valid(grid, x, y, val, increase):
 
     return True
 
+def valid_cdt(cdt_list, val):
+    if type(cdt_list) == int:   # ignore
+        return True
+
+    if len(cdt_list) > 9:
+        return False
+    else:
+        for iter in cdt_list:
+            if iter == val:
+                return False
+    
+    return True
+
 class Main():
     def __init__(self):
         self.board = []
@@ -71,13 +85,15 @@ class Main():
 
         display = Display_board(self.screen)
 
-        flag1 = 0
         val = 0
-        pos = (0, 0)
+        blink = False
+        alpha = 1
+        a_change = True
+        blink_color = GREEN
+        candidates = []
         
-        input_lock = 0
-        get_cord((0, 0))
-        set_highlight((0, 0), (0, 0), (0, 0), input_lock)
+        get_cord(INITIAL_CORDS)
+        set_highlight(INITIAL_CORDS, INITIAL_CORDS, INITIAL_CORDS, INITIAL_LOCK)
 
         board = create_board().board
 
@@ -85,10 +101,15 @@ class Main():
             for event in pg.event.get():
                 if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                     exit()
-                if event.type == pg.MOUSEBUTTONDOWN:
-                    flag1 = 1
+                if event.type == pg.MOUSEBUTTONDOWN and input_lock != 1:
                     pos = pg.mouse.get_pos()
                     get_cord(pos)
+
+                    # Checks if selection is on the board
+                    if pos[0] < TOP_LX or pos[1] < TOP_LY or pos[0] > int(BOT_RX) or pos[1] > int(BOT_RY):
+                        blink = False
+                    else:
+                        blink = True
                 if event.type == pg.KEYDOWN and input_lock != 1:
                     if event.key == pg.K_1:
                         val = 1
@@ -108,29 +129,57 @@ class Main():
                         val = 8
                     if event.key == pg.K_9:
                         val = 9
+                    if event.key == pg.K_BACKSPACE:
+                        board[int(box_index_x)][int(box_index_y)] = 0
                 elif event.type == pg.KEYDOWN and input_lock == 1:
                     if event.key == pg.K_BACKSPACE:
                         val = 0
-                        set_highlight((0, 0), (0, 0), (0, 0), 0)
+                        set_highlight(INITIAL_CORDS, INITIAL_CORDS, INITIAL_CORDS, INITIAL_LOCK)
+                        blink_color = GREEN
+                        board[int(box_index_x)][int(box_index_y)] = 0
 
             if val != 0:
-                display.draw_val(val, box_index_x, box_index_y)
+                # display.draw_val(val, box_index_x, box_index_y)
+                candidates = []
+                print("value: ", val,"occupying position: ", board[box_index_x][box_index_y])
 
-                if valid(board, int(box_index_x), int(box_index_y), val, display):
-                    board[int(box_index_x)][int(box_index_y)] = val
+                if valid(board, box_index_x, box_index_y, val):
+                    if type(board[box_index_x][box_index_y]) == int: 
+                        board[box_index_x][box_index_y] = val
+                    elif valid_cdt(board[box_index_x][box_index_y], val): 
+                        candidates = board[box_index_x][box_index_y]
+                        candidates.append(val)
+                        board[box_index_x][box_index_y] = candidates
                 else:
-                    board[int(box_index_x)][int(box_index_y)] = 0
-                val = 0
+                    board[box_index_x][box_index_y] = val
+                
 
+            # Draws the screen
             pg.draw.rect(self.screen, BLACK, (0, 0, self.screen.get_width(), self.screen.get_height()))
             self.screen.fill(BEIGE)
 
+            # Draws the board
             display.draw(board)
-            #display.glow(box_index_x, box_index_y)
-            print(box_index_x, box_index_y)
 
-            if input_lock == 1:
+            # Check if cell is selected
+            if blink:
+                cell = display.find_cell(box_index_x, box_index_y)
+                blink = display.blink(alpha, a_change)
+                alpha = blink[0]
+                a_change = blink[1]
+                myRect = pg.Rect(cell)
+                
+                rectSurf = pg.Surface(myRect.size, pg.SRCALPHA)
+                rectSurf.fill(blink_color)
+                rectSurf.set_alpha(alpha)
+                self.screen.blit(rectSurf, (myRect.x, myRect.y))
+
+            # Check if incorrect input
+            if input_lock == 1 and val != 0:
                 display.update(board, row_index, col_index, blk_index)
+                blink_color = RED
+            
+            val = 0
 
             # display.draw_box()
 
