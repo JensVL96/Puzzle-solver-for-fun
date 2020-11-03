@@ -144,26 +144,29 @@ class Main():
                 print("value: ", val,"occupying position: ", board[box_index_x][box_index_y])
 
                 if valid(board, box_index_x, box_index_y, val):
-                    if type(board[box_index_x][box_index_y]) == int: 
+                    if type(board[box_index_x][box_index_y]) == 0:  # No candidates
                         board[box_index_x][box_index_y] = val
-                    elif valid_cdt(board[box_index_x][box_index_y], val): 
+                    elif type(board[box_index_x][box_index_y]) == int: # Switching from number to list
+                        candidates.append(val)
+                        board[box_index_x][box_index_y] = candidates
+                    elif valid_cdt(board[box_index_x][box_index_y], val): # Adding candidate to list
                         candidates = board[box_index_x][box_index_y]
                         candidates.append(val)
                         board[box_index_x][box_index_y] = candidates
-                else:
-                    board[box_index_x][box_index_y] = val
                 
 
             # Draws the screen
             pg.draw.rect(self.screen, BLACK, (0, 0, self.screen.get_width(), self.screen.get_height()))
             self.screen.fill(BEIGE)
 
+            # find the cell selected
+            cell = display.find_cell(box_index_x, box_index_y)
+
             # Draws the board
-            display.draw(board)
+            display.draw(board, cell)
 
             # Check if cell is selected
             if blink:
-                cell = display.find_cell(box_index_x, box_index_y)
                 blink = display.blink(alpha, a_change)
                 alpha = blink[0]
                 a_change = blink[1]
